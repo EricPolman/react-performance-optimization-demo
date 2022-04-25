@@ -84,7 +84,7 @@ export default function Controls({}: Props) {
           <label htmlFor="in">Max distance</label>
         </span>
       </div>
-      <div className="flex flex-row flex-wrap card-container">
+      <div className="flex flex-row flex-wrap card-container mt-5">
         <span className="p-float-label">
           <InputText
             type="number"
