@@ -1,26 +1,25 @@
 import chroma from 'chroma-js';
-import { cloneDeep } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useGameContext } from './GameContext';
-import { useMousePosition } from './useMousePosition';
-import { calculateDistanceToMouse, generateRandomNumber } from './utils';
+import { calculateDistanceToMouse } from './utils';
 
 type Props = {
   x: number;
   y: number;
   onClick(): void;
+  getMousePosition(): { x: number; y: number };
 };
 
-export default function Block({ x, y, onClick }: Props) {
+export default function Block({ x, y, onClick, getMousePosition }: Props) {
   const gameContext = useGameContext();
-  const mousePosition = useMousePosition();
+  const mousePosition = getMousePosition();
   const { blocks } = gameContext.data;
   const { config } = gameContext;
   const block = { ...blocks[x][y] };
 
   const position = {
-    x: (x + 0.5) * config.blockWidth,
-    y: (y + 0.5) * config.blockHeight + 200,
+    x: (x + 0.5) * config.blockWidth - window.scrollX,
+    y: (y + 0.5) * config.blockHeight + 200 - window.scrollY,
   };
 
   const { distance, distanceRatio, isWithinRange } = calculateDistanceToMouse(
@@ -29,16 +28,25 @@ export default function Block({ x, y, onClick }: Props) {
     config.maxDistance
   );
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      block.health = generateRandomNumber() * 100;
-      gameContext.updateBlock(x, y, block);
-    }, 3000);
+  const bgColorOuter = useMemo(
+    () => chroma.mix('red', 'green', block.health / 100).hex(),
+    [block.health]
+  );
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
+  const bgColorInner = useMemo(
+    () =>
+      chroma.mix('black', 'white', 1.0 - Math.pow(distanceRatio, 1 / 5)).hex(),
+    [distanceRatio]
+  );
+
+  const borderColorInner = useMemo(
+    () => chroma.mix('black', 'white', 1.0 - distanceRatio).hex(),
+    [distanceRatio]
+  );
+
+  // useEffect(() => {
+  //   requestAnimationFrame(() => {})
+  // }, []);
 
   return (
     <div
@@ -49,7 +57,7 @@ export default function Block({ x, y, onClick }: Props) {
           : config.blockWidth / 2,
         cursor: 'pointer',
         position: 'absolute',
-        backgroundColor: chroma.mix('red', 'green', block.health / 100).hex(),
+        backgroundColor: bgColorOuter,
         left: x * config.blockWidth,
         top: y * config.blockHeight,
         width: config.blockWidth,
@@ -59,16 +67,12 @@ export default function Block({ x, y, onClick }: Props) {
       <div
         style={{
           position: 'relative',
-          backgroundColor: chroma
-            .mix('black', 'white', 1.0 - Math.pow(distanceRatio, 1 / 5))
-            .hex(),
+          backgroundColor: bgColorInner,
           left: config.blockWidth / 4,
           top: config.blockHeight / 4,
           width: config.blockWidth / 2,
           height: config.blockHeight / 2,
-          border: `5px solid ${chroma
-            .mix('black', 'white', 1.0 - distanceRatio)
-            .hex()}`,
+          border: `5px solid ${borderColorInner}`,
           borderRadius: isWithinRange ? '50%' : 0,
         }}
       ></div>

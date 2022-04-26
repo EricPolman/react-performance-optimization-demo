@@ -1,18 +1,23 @@
-import chroma from 'chroma-js';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Block from './Block';
-import { GameConfig, GameData, useGameContext } from './GameContext';
-import { useMousePosition } from './useMousePosition';
-import { calculateDistance } from './utils';
+import { GameBlock, GameConfig, GameData, useGameContext } from './GameContext';
+import { calculateDistance, generateRandomNumber } from './utils';
 
 type Props = {
   gameData: GameData;
   gameConfig: GameConfig;
+  frame: number;
+  getMousePosition(): { x: number; y: number };
 };
 
-export default function Game({ gameData, gameConfig }: Props) {
-  const mousePosition = useMousePosition();
+export default function Game({
+  gameData,
+  gameConfig,
+  frame,
+  getMousePosition,
+}: Props) {
   const gameContext = useGameContext();
+  const mousePosition = getMousePosition();
 
   const onClickBlock = (x: number, y: number) => {
     for (let _x = 0; _x < gameContext.config.columns; ++_x) {
@@ -38,6 +43,26 @@ export default function Game({ gameData, gameConfig }: Props) {
     }
   };
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const blocks: GameBlock[][] = [];
+      for (let x = 0; x < gameConfig.columns; ++x) {
+        const row: GameBlock[] = [];
+        for (let y = 0; y < gameConfig.rows; ++y) {
+          row.push({
+            health: generateRandomNumber() * 100,
+          });
+        }
+        blocks.push(row);
+      }
+      gameContext.updateBlocks(blocks);
+    }, 3000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [gameContext.config]);
+
   return (
     <>
       <div style={{ position: 'absolute', top: 200 }}>
@@ -47,6 +72,7 @@ export default function Game({ gameData, gameConfig }: Props) {
               onClick={() => onClickBlock(x, y)}
               x={x}
               y={y}
+              getMousePosition={getMousePosition}
               key={`x:${x},y:${y}`}
             />
           ))

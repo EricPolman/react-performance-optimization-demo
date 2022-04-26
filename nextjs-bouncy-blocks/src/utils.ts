@@ -95,3 +95,12 @@ export function findNthPrime(nth: number) {
 //   }
 //   return primes[nth - 1];
 // }
+
+let mousePosition = { x: 0, y: 0 };
+document.addEventListener('mousemove', (event) => {
+  mousePosition = { x: event.clientX, y: event.clientY };
+});
+
+export function getMousePosition() {
+  return mousePosition;
+}

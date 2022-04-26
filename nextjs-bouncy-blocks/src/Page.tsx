@@ -7,10 +7,22 @@ import {
   GameData,
 } from './GameContext';
 import Game from './Game';
-import { generateRandomNumber } from './utils';
+import { generateRandomNumber, getMousePosition } from './utils';
 import { cloneDeep } from 'lodash';
 
 const Page = () => {
+  const [frame, setFrame] = useState<number>(0);
+  // // alle blocks los bijhouden en in grid plaatsen op basis van caching key
+  // // canvas toepassen om uberhaupt geen components te renderen
+  // // gewoon geen cloneDeep doen en see what happens
+  // //
+
+  useEffect(() => {
+    setInterval(() => {
+      setFrame((prev) => prev + 1);
+    }, 8);
+  }, []);
+
   const [gameConfig, setGameConfig] = useState<GameConfig>({
     rows: 10,
     columns: 10,
@@ -48,11 +60,17 @@ const Page = () => {
             return updatedData;
           });
         },
+        updateBlocks: (blocks) => setGameData({ blocks }),
       }}
     >
       <div>
         <Controls />
-        <Game gameData={gameData} gameConfig={gameConfig} />
+        <Game
+          frame={0}
+          gameData={gameData}
+          gameConfig={gameConfig}
+          getMousePosition={getMousePosition}
+        />
       </div>
     </GameContextProvider>
   );

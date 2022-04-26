@@ -2,7 +2,7 @@ import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 
 const DynamicComponentWithNoSSR = dynamic(() => import('../src/Page'), {
-  ssr: true,
+  ssr: false,
 });
 
 const Home: NextPage = () => {

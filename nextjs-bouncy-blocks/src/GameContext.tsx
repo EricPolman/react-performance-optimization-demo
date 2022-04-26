@@ -21,6 +21,7 @@ interface GameContextValue {
   data: GameData;
   setConfig(newConfig: GameConfig): void;
   updateBlock(x: number, y: number, block: GameBlock): void;
+  updateBlocks(blocks: GameBlock[][]): void;
 }
 
 const GameContext = React.createContext<GameContextValue | null>(null);
